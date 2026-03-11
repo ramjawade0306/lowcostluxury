@@ -8,13 +8,18 @@ export const revalidate = 60; // Enable ISR (Incremental Static Regeneration) fo
 
 
 async function getData() {
-  const [categories, hotDeals, reviews, shopInfo] = await Promise.all([
-    prisma.category.findMany({ orderBy: { name: 'asc' } }),
-    prisma.product.findMany({ where: { isHotDeal: true, isSoldOut: false }, take: 8, include: { category: true } }),
-    prisma.review.findMany({ where: { isActive: true }, take: 6 }),
-    prisma.aboutShop.findFirst({ where: { id: '1' } }),
-  ]);
-  return { categories, hotDeals, reviews, shopInfo };
+  try {
+    const [categories, hotDeals, reviews, shopInfo] = await Promise.all([
+      prisma.category.findMany({ orderBy: { name: 'asc' } }),
+      prisma.product.findMany({ where: { isHotDeal: true, isSoldOut: false }, take: 8, include: { category: true } }),
+      prisma.review.findMany({ where: { isActive: true }, take: 6 }),
+      prisma.aboutShop.findFirst({ where: { id: '1' } }),
+    ]);
+    return { categories, hotDeals, reviews, shopInfo };
+  } catch (error) {
+    console.warn("Database not available during build for / page ISR. Returning empty fallback data.", error);
+    return { categories: [], hotDeals: [], reviews: [], shopInfo: null };
+  }
 }
 
 export default async function HomePage() {
