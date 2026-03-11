@@ -1,0 +1,209 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
+import { useAdminAuth } from '@/context/AdminAuthContext';
+import { formatPrice } from '@/lib/utils';
+import toast from 'react-hot-toast';
+
+type Order = {
+  id: string;
+  orderId: string;
+  status: string;
+  paymentStatus: string;
+  total: number;
+  address: string;
+  phone: string;
+  user: { name: string; email: string };
+  items: { id: string; product: { name: string; images: string }; quantity: number; price: number; returnStatus?: string; returnReason?: string }[];
+};
+
+export default function AdminOrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [trackingModal, setTrackingModal] = useState<{ orderId: string, open: boolean }>({ orderId: '', open: false });
+  const [trackingInput, setTrackingInput] = useState('');
+  const searchParams = useSearchParams();
+  const focusId = searchParams.get('id');
+  const { token } = useAdminAuth();
+
+  const load = () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` } })
+      .then(async (r) => {
+        const text = await r.text();
+        if (!text) return [];
+        try {
+          return JSON.parse(text);
+        } catch {
+          return [];
+        }
+      })
+      .then(setOrders)
+      .catch(() => setOrders([]))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    load();
+  }, [token]);
+
+  const updateStatus = async (id: string, newStatus: string, trackingId: string | null = null) => {
+    // Optimistically update the UI
+    setOrders(current =>
+      current.map(o => o.id === id ? { ...o, status: newStatus } : o)
+    );
+
+    setUpdating(id);
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: newStatus, trackingId }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success('Updated');
+    } catch {
+      toast.error('Failed');
+      load(); // Revert on failure
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const handleStatusChange = (id: string, newStatus: string) => {
+    if (newStatus === 'shipped') {
+      setTrackingModal({ orderId: id, open: true });
+      setTrackingInput('');
+    } else {
+      updateStatus(id, newStatus);
+    }
+  };
+
+  const submitTrackingUpdate = () => {
+    updateStatus(trackingModal.orderId, 'shipped', trackingInput.trim() || null);
+    setTrackingModal({ orderId: '', open: false });
+  };
+
+  const updateReturnStatus = async (itemId: string, status: string) => {
+    try {
+      const res = await fetch(`/api/admin/order-items/${itemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ returnStatus: status }),
+      });
+      if (!res.ok) throw new Error();
+      load();
+      toast.success('Return status updated');
+    } catch {
+      toast.error('Failed to update return status');
+    }
+  };
+
+  if (loading) return <div className="animate-pulse h-64 bg-gray-200 rounded-xl" />;
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold mb-6">Orders</h1>
+      <div className="space-y-4">
+        {orders.map((order) => (
+          <div key={order.id} className={`card overflow-hidden ${focusId === order.orderId ? 'ring-2 ring-accent' : ''}`}>
+            <div className="p-4 bg-gray-50 flex flex-wrap items-center justify-between gap-2">
+              <span className="font-mono font-bold">{order.orderId}</span>
+              <span>{order.user?.name} · {order.user?.email}</span>
+              <span>{order.phone}</span>
+              <span className="font-bold">{formatPrice(order.total)}</span>
+              <select
+                value={order.status}
+                onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                disabled={updating === order.id}
+                className="text-sm border rounded px-2 py-1"
+              >
+                <option value="placed">Placed</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <span className="text-sm text-gray-500">Payment: {order.paymentStatus}</span>
+            </div>
+            <div className="p-4 text-sm text-gray-600">{order.address}</div>
+            <div className="divide-y">
+              {order.items.map((item, i) => (
+                <div key={i} className="p-4 flex gap-4">
+                  <div className="relative w-12 h-12 rounded overflow-hidden bg-gray-100 flex-shrink-0">
+                    <Image src={item.product?.images?.split(',')[0]?.trim() || '/placeholder.svg'} alt="" fill className="object-cover" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium">{item.product?.name}</div>
+                    <div className="text-gray-500">Qty: {item.quantity} × {formatPrice(item.price)}</div>
+                    {item.returnStatus && (
+                      <div className="mt-1">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-bold uppercase ${item.returnStatus === 'requested' ? 'bg-yellow-100 text-yellow-700' :
+                          item.returnStatus === 'approved' ? 'bg-blue-100 text-blue-700' :
+                            item.returnStatus === 'refunded' ? 'bg-green-100 text-green-700' :
+                              'bg-red-100 text-red-700'
+                          }`}>
+                          Return: {item.returnStatus}
+                        </span>
+                        {item.returnReason && <div className="text-xs text-gray-400 mt-1 italic">Reason: {item.returnReason}</div>}
+
+                        {item.returnStatus === 'requested' && (
+                          <div className="flex gap-2 mt-2">
+                            <button onClick={() => updateReturnStatus(item.id, 'approved')} className="text-xs bg-accent text-white px-2 py-1 rounded">Approve</button>
+                            <button onClick={() => updateReturnStatus(item.id, 'rejected')} className="text-xs bg-gray-200 px-2 py-1 rounded">Reject</button>
+                          </div>
+                        )}
+                        {item.returnStatus === 'approved' && (
+                          <div className="mt-2 text-xs">
+                            <button onClick={() => updateReturnStatus(item.id, 'refunded')} className="bg-green-600 text-white px-2 py-1 rounded">Mark as Refunded</button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div>{formatPrice(item.price * item.quantity)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {trackingModal.open && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl w-full max-w-sm shadow-xl">
+            <h3 className="font-bold text-lg mb-4">Enter Tracking ID</h3>
+            <p className="text-sm text-gray-500 mb-4">Provide the delivery partner tracking ID. You can leave this blank if not applicable.</p>
+            <input
+              type="text"
+              placeholder="e.g. AWB123456789"
+              value={trackingInput}
+              onChange={(e) => setTrackingInput(e.target.value)}
+              className="w-full border p-2 rounded mb-6 focus:ring-2 focus:ring-accent outline-none"
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setTrackingModal({ orderId: '', open: false })}
+                className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitTrackingUpdate}
+                className="px-4 py-2 bg-accent text-white rounded hover:bg-orange-600 font-medium"
+              >
+                Confirm Shipment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

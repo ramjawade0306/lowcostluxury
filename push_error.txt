@@ -1,0 +1,7 @@
+remote: error: Trace: 4b5c5abc94ed48e9ad0a1bfc81ed0d28ef492a824cebc56fccef79693294eaaa        
+remote: error: See https://gh.io/lfs for more information.        
+remote: error: File node_modules/@next/swc-win32-x64-msvc/next-swc.win32-x64-msvc.node is 129.57 MB; this exceeds GitHub's file size limit of 100.00 MB        
+remote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.        
+To https://github.com/ramjawade0306/lowcostluxury.git
+ ! [remote rejected] new-main -> main (pre-receive hook declined)
+error: failed to push some refs to 'https://github.com/ramjawade0306/lowcostluxury.git'

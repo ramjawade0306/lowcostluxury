@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?
+  password  String
+  name      String
+  phone     String   @unique
+  isVerified Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  addresses Address[]
+  orders    Order[]
+}
+
+model OTP {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  purpose   String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  phone     String?  @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String
+  address   String
+  city      String
+  state     String
+  pincode   String
+  isDefault Boolean  @default(false)
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  image     String?
+  createdAt DateTime  @default(now())
+  products  Product[]
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String
+  price       Float
+  discount    Float     @default(0)
+  stock       Int       @default(0)
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images      String
+  isHotDeal   Boolean   @default(false)
+  isSoldOut   Boolean   @default(false)
+  isReturnable Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  orderId        String      @unique
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  status         String      @default("placed")
+  paymentStatus  String      @default("pending")
+  subtotal       Float
+  discount       Float       @default(0)
+  deliveryCharge Float       @default(0)
+  total          Float
+  address        String
+  phone          String
+  couponCode     String?
+  phonepeTransactionId String?
+  phonepePaymentId   String?
+  trackingId         String?
+  shippedAt          DateTime?
+  deliveredAt        DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  items          OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+  returnStatus String?
+  returnReason String?
+  replacementStatus String?
+  replacementReason String?
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  orderId         String
+  phonepeTransactionId String
+  phonepePaymentId   String?
+  amount          Float
+  status          String
+  createdAt       DateTime @default(now())
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  image     String
+  rating    Int
+  comment   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Coupon {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  discount    Float
+  minOrder    Float    @default(0)
+  maxUses     Int?
+  usedCount   Int      @default(0)
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+model AboutShop {
+  id               String   @id @default("1")
+  shopDescription  String   @default("")
+  ownerName        String   @default("")
+  ownerPhoto       String?
+  ownerBio         String   @default("")
+  instagramLink    String?
+  whatsappLink     String?
+  yearsInBusiness  String   @default("0")
+  customersServed  String   @default("0")
+  showOwnerSection Boolean  @default(true)
+  promiseText      String   @default("Genuine product promise")
+  shippingNote     String   @default("Fast response / fast shipping")
+  proofImages      String   @default("[]") // JSON string array of image URLs
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}

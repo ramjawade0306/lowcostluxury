@@ -1,0 +1,253 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useAdminAuth } from '@/context/AdminAuthContext';
+import { formatPrice } from '@/lib/utils';
+import toast from 'react-hot-toast';
+import MediaUpload from '@/components/MediaUpload';
+
+type Product = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  price: number;
+  discount: number;
+  stock: number;
+  isHotDeal: boolean;
+  isSoldOut: boolean;
+  category: { id: string; name: string };
+  images: string;
+  isReturnable: boolean;
+};
+
+type Category = { id: string; name: string };
+
+export default function AdminProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Product | null>(null);
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    price: 0,
+    discount: 0,
+    stock: 0,
+    categoryId: '',
+    images: '',
+    isHotDeal: false,
+    isSoldOut: false,
+    isReturnable: false,
+  });
+  const { token } = useAdminAuth();
+
+  const parseJson = async (r: Response, fallback: unknown) => {
+    const text = await r.text();
+    if (!text) return fallback;
+    try {
+      return JSON.parse(text);
+    } catch {
+      return fallback;
+    }
+  };
+
+  const load = () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    Promise.all([
+      fetch('/api/admin/products', { headers: { Authorization: `Bearer ${token}` } }).then((r) => parseJson(r, [])),
+      fetch('/api/admin/categories', { headers: { Authorization: `Bearer ${token}` } }).then((r) => parseJson(r, [])),
+    ]).then(([prods, cats]) => {
+      setProducts(prods);
+      setCategories(cats);
+    }).catch(() => { }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    load();
+  }, [token]);
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const url = editing ? `/api/admin/products/${editing.id}` : '/api/admin/products';
+      const res = await fetch(url, {
+        method: editing ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      load();
+      setShowForm(false);
+      setEditing(null);
+      setForm({ name: '', description: '', price: 0, discount: 0, stock: 0, categoryId: '', images: '', isHotDeal: false, isSoldOut: false, isReturnable: false });
+      toast.success(editing ? 'Updated' : 'Created');
+    } catch {
+      toast.error('Failed');
+    }
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm('Delete this product?')) return;
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error();
+      load();
+      toast.success('Deleted');
+    } catch {
+      toast.error('Failed to delete');
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Products</h1>
+        <button onClick={() => { setEditing(null); setShowForm(true); }} className="btn-primary">
+          + Add Product
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={save} className="card p-6 mb-6 space-y-4">
+          <h3 className="font-bold">{editing ? 'Edit' : 'New'} Product</h3>
+          <input
+            placeholder="Name"
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            className="input"
+            required
+          />
+          <textarea
+            placeholder="Description"
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            className="input"
+            rows={3}
+          />
+          <div className="grid grid-cols-3 gap-4">
+            <input
+              type="number"
+              placeholder="Price"
+              value={form.price || ''}
+              onChange={(e) => setForm((f) => ({ ...f, price: +e.target.value }))}
+              className="input"
+              required
+            />
+            <input
+              type="number"
+              placeholder="Discount %"
+              min="0"
+              max="100"
+              value={form.discount || ''}
+              onChange={(e) => {
+                let val = Number(e.target.value);
+                if (val > 100) val = 100;
+                if (val < 0) val = 0;
+                setForm((f) => ({ ...f, discount: val }));
+              }}
+              className="input"
+            />
+            <input
+              type="number"
+              placeholder="Stock"
+              value={form.stock || ''}
+              onChange={(e) => setForm((f) => ({ ...f, stock: +e.target.value }))}
+              className="input"
+            />
+          </div>
+          <select
+            value={form.categoryId}
+            onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
+            className="input"
+            required
+          >
+            <option value="">Category</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <MediaUpload
+            label="Product Images"
+            value={form.images}
+            onChange={(val) => setForm(f => ({ ...f, images: val }))}
+            multiple={true}
+            accept="image/*"
+          />
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={form.isHotDeal} onChange={(e) => setForm((f) => ({ ...f, isHotDeal: e.target.checked }))} />
+            Hot Deal
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={form.isSoldOut} onChange={(e) => setForm((f) => ({ ...f, isSoldOut: e.target.checked }))} />
+            Sold Out
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={form.isReturnable} onChange={(e) => setForm((f) => ({ ...f, isReturnable: e.target.checked }))} />
+            Returnable
+          </label>
+          <div className="flex gap-2">
+            <button type="submit" className="btn-primary">Save</button>
+            <button type="button" onClick={() => setShowForm(false)} className="btn-outline">Cancel</button>
+          </div>
+        </form>
+      )}
+
+      {loading ? (
+        <div className="animate-pulse h-48 bg-gray-200 rounded-xl" />
+      ) : (
+        <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="text-left p-4">Product</th>
+                  <th className="text-left p-4">Price</th>
+                  <th className="text-left p-4">Stock</th>
+                  <th className="text-left p-4">Status</th>
+                  <th className="p-4"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr key={p.id} className="border-t">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-12 h-12 rounded overflow-hidden bg-gray-100">
+                          <Image src={p.images?.split(',')[0]?.trim() || '/placeholder.svg'} alt="" fill className="object-cover" />
+                        </div>
+                        <div>
+                          <div className="font-medium">{p.name}</div>
+                          <div className="text-sm text-gray-500">{p.category?.name}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4">{formatPrice(p.price)} {p.discount > 0 && `(-${p.discount}%)`}</td>
+                    <td className="p-4">{p.stock}</td>
+                    <td className="p-4">
+                      {p.isSoldOut ? <span className="text-red-600">Sold Out</span> : p.isHotDeal ? <span className="text-accent">Hot</span> : '-'}
+                      {p.isReturnable && <span className="ml-2 text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">Returnable</span>}
+                    </td>
+                    <td className="p-4">
+                      <button onClick={() => { setEditing(p); setForm({ name: p.name, description: p.description || '', price: p.price, discount: p.discount, stock: p.stock, categoryId: p.category?.id || '', images: p.images || '', isHotDeal: p.isHotDeal, isSoldOut: p.isSoldOut, isReturnable: p.isReturnable }); setShowForm(true); }} className="text-accent text-sm mr-2">Edit</button>
+                      <button onClick={() => remove(p.id)} className="text-red-500 text-sm">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
