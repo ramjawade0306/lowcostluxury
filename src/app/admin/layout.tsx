@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AdminAuthProvider, useAdminAuth } from '@/context/AdminAuthContext';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +17,11 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { admin, logout } = useAdminAuth();
   const router = useRouter();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [path]);
 
   useEffect(() => {
     if (path !== '/admin/login' && admin === null && typeof window !== 'undefined') {
@@ -37,8 +42,24 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
-      <aside className="w-full md:w-56 bg-gray-800 p-4 flex-shrink-0">
-        <Link href="/admin" className="text-xl font-bold text-accent block mb-6">
+      {/* Mobile Header with Hamburger */}
+      <div className="md:hidden bg-gray-800 p-4 flex justify-between items-center text-white">
+        <Link href="/admin" className="text-xl font-bold text-accent">
+          Admin
+        </Link>
+        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="focus:outline-none">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {isMobileMenuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+      </div>
+
+      <aside className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:block w-full md:w-56 bg-gray-800 p-4 flex-shrink-0`}>
+        <Link href="/admin" className="hidden md:block text-xl font-bold text-accent mb-6">
           Admin
         </Link>
         <nav className="space-y-1">
