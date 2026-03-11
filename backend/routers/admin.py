@@ -154,8 +154,8 @@ def get_dashboard(db: Session = Depends(get_db)):
     from datetime import datetime, time, timedelta
     from sqlalchemy import func
     
-    # Calculate Orders in the trailing 24 hours (safer for global timezone differences without complex tz queries)
-    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+    # Calculate Orders in the trailing 24 hours
+    twenty_four_hours_ago = datetime.utcnow() - timedelta(hours=24)
     
     total_sales = db.query(func.sum(models.Order.total)).filter(
         models.Order.paymentStatus.in_(['paid', 'cod_pending'])
