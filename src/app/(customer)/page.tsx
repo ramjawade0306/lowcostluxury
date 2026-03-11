@@ -63,17 +63,17 @@ export default async function HomePage() {
                 <div className="absolute inset-0 border-2 border-accent/20 rounded-[3rem] -rotate-3 animate-float drop-shadow-2xl"></div>
 
                 {/* Dynamic Image or Stat Card */}
-                <div className="absolute top-[10%] -left-[5%] glass p-6 rounded-3xl animate-float shadow-2xl z-20" style={{ animationDelay: '-1s' }}>
+                <div className="absolute top-[5%] -right-[15%] glass p-6 rounded-3xl animate-float shadow-2xl z-20" style={{ animationDelay: '-1s' }}>
                   <div className="text-accent font-black text-2xl">99%</div>
                   <div className="text-[10px] font-bold text-gray-500 tracking-widest leading-tight">POSITIVE<br />REVIEWS</div>
                 </div>
 
-                <div className="absolute bottom-[20%] -right-[5%] glass p-6 rounded-3xl animate-float shadow-2xl z-20" style={{ animationDelay: '-3s' }}>
+                <div className="absolute bottom-[10%] -left-[10%] glass p-6 rounded-3xl animate-float shadow-2xl z-20" style={{ animationDelay: '-3s' }}>
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <div className="text-[10px] font-bold text-gray-400 tracking-widest leading-tight">FAST DELIVERY</div>
+                    <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+                    <div className="text-[10px] font-bold text-gray-400 tracking-widest leading-tight">GENUINE QUALITY</div>
                   </div>
-                  <div className="text-gray-900 font-black text-lg underline decoration-accent decoration-2">24-48 HOURS</div>
+                  <div className="text-gray-900 font-black text-lg underline decoration-accent decoration-2">100% ASSURED</div>
                 </div>
 
                 {/* Main Hero Visual Placeholder/Image */}
