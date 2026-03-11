@@ -15,8 +15,9 @@ type Order = {
   total: number;
   address: string;
   phone: string;
+  createdAt: string;
   user: { name: string; email: string };
-  items: { id: string; product: { name: string; images: string }; quantity: number; price: number; returnStatus?: string; returnReason?: string }[];
+  items: { id: string; product: { name: string; images: string }; quantity: number; price: number; returnStatus?: string; returnReason?: string; replacementStatus?: string }[];
 };
 
 export default function AdminOrdersPage() {
@@ -107,11 +108,43 @@ export default function AdminOrdersPage() {
 
   if (loading) return <div className="animate-pulse h-64 bg-gray-200 rounded-xl" />;
 
+  const filter = searchParams.get('filter');
+
+  let filteredOrders = orders;
+  if (filter === 'today') {
+    const today = new Date().toDateString();
+    filteredOrders = orders.filter(o => new Date(o.createdAt).toDateString() === today);
+  } else if (filter === 'pending') {
+    filteredOrders = orders.filter(o => o.status === 'placed');
+  } else if (filter === 'replacements') {
+    filteredOrders = orders.filter(o => o.items.some(i => i.replacementStatus === 'requested'));
+  }
+
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Orders</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold flex items-center gap-3">
+          Orders
+          {filter && (
+            <span className="text-sm font-normal bg-gray-200 text-gray-700 px-3 py-1 rounded-full capitalize">
+              Filter: {filter.replace('-', ' ')}
+            </span>
+          )}
+        </h1>
+        {filter && (
+          <button
+            onClick={() => window.location.href = '/admin/orders'}
+            className="text-sm text-accent hover:underline"
+          >
+            Clear Filter
+          </button>
+        )}
+      </div>
+
       <div className="space-y-4">
-        {orders.map((order) => (
+        {filteredOrders.length === 0 ? (
+          <div className="text-gray-500 text-center py-12">No orders match this filter.</div>
+        ) : filteredOrders.map((order) => (
           <div key={order.id} className={`card overflow-hidden ${focusId === order.orderId ? 'ring-2 ring-accent' : ''}`}>
             <div className="p-4 bg-gray-50 flex flex-wrap items-center justify-between gap-2">
               <span className="font-mono font-bold">{order.orderId}</span>

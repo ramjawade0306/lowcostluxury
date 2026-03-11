@@ -165,7 +165,7 @@ def get_dashboard(db: Session = Depends(get_db)):
     ).count()
     
     pending_orders = db.query(models.Order).filter(
-        models.Order.status.in_(['placed', 'shipped'])
+        models.Order.status == 'placed'
     ).count()
     
     replacement_requests = db.query(models.OrderItem).filter(

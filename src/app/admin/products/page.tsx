@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import { formatPrice } from '@/lib/utils';
@@ -42,6 +43,8 @@ export default function AdminProductsPage() {
     isSoldOut: false,
     isReturnable: false,
   });
+  const searchParams = useSearchParams();
+  const filter = searchParams.get('filter');
   const { token } = useAdminAuth();
 
   const parseJson = async (r: Response, fallback: unknown) => {
@@ -108,13 +111,34 @@ export default function AdminProductsPage() {
     }
   };
 
+  const filteredProducts = filter === 'low-stock'
+    ? products.filter(p => p.stock < 10 && !p.isSoldOut)
+    : products;
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Products</h1>
-        <button onClick={() => { setEditing(null); setShowForm(true); }} className="btn-primary">
-          + Add Product
-        </button>
+        <h1 className="text-2xl font-bold flex items-center gap-3">
+          Products
+          {filter && (
+            <span className="text-sm font-normal bg-gray-200 text-gray-700 px-3 py-1 rounded-full capitalize">
+              Filter: {filter.replace('-', ' ')}
+            </span>
+          )}
+        </h1>
+        <div className="flex items-center gap-4">
+          {filter && (
+            <button
+              onClick={() => window.location.href = '/admin/products'}
+              className="text-sm text-accent hover:underline"
+            >
+              Clear Filter
+            </button>
+          )}
+          <button onClick={() => { setEditing(null); setShowForm(true); }} className="btn-primary">
+            + Add Product
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -218,7 +242,11 @@ export default function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody>
-                {products.map((p) => (
+                {filteredProducts.length === 0 && !loading ? (
+                  <tr>
+                    <td colSpan={5} className="p-8 text-center text-gray-500">No products match this filter.</td>
+                  </tr>
+                ) : filteredProducts.map((p) => (
                   <tr key={p.id} className="border-t">
                     <td className="p-4">
                       <div className="flex items-center gap-3">

@@ -43,26 +43,26 @@ export default function AdminDashboard() {
           <div className="text-gray-500 text-sm">Total Sales</div>
           <div className="text-2xl font-bold text-accent">{formatPrice(data.totalSales)}</div>
         </div>
-        <div className="card p-6">
+        <Link href="/admin/orders?filter=today" className="card p-6 block hover:shadow-md transition-shadow cursor-pointer">
           <div className="text-gray-500 text-sm">Orders Today</div>
           <div className="text-2xl font-bold">{data.ordersToday}</div>
-        </div>
+        </Link>
         <div className="card p-6">
           <div className="text-gray-500 text-sm">Products</div>
           <div className="text-2xl font-bold">{data.productsCount}</div>
         </div>
-        <div className="card p-6">
+        <Link href="/admin/products?filter=low-stock" className="card p-6 block hover:shadow-md transition-shadow cursor-pointer">
           <div className="text-gray-500 text-sm">Low Stock Alert</div>
           <div className={`text-2xl font-bold ${data.lowStock > 0 ? 'text-red-600' : ''}`}>{data.lowStock}</div>
-        </div>
-        <div className="card p-6 bg-blue-50/50">
+        </Link>
+        <Link href="/admin/orders?filter=pending" className="card p-6 bg-blue-50/50 block hover:shadow-md transition-shadow cursor-pointer">
           <div className="text-gray-500 text-sm">Pending Orders</div>
           <div className="text-2xl font-bold text-blue-700">{data.pendingOrders}</div>
-        </div>
-        <div className="card p-6 bg-yellow-50/50">
+        </Link>
+        <Link href="/admin/orders?filter=replacements" className="card p-6 bg-yellow-50/50 block hover:shadow-md transition-shadow cursor-pointer">
           <div className="text-gray-500 text-sm">Replacements</div>
           <div className="text-2xl font-bold text-yellow-700">{data.replacementRequests}</div>
-        </div>
+        </Link>
       </div>
       <div className="card overflow-hidden">
         <div className="p-4 border-b font-bold">Recent Orders</div>
