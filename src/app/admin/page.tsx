@@ -13,7 +13,7 @@ export default function AdminDashboard() {
     replacementRequests: number;
     productsCount: number;
     lowStock: number;
-    recentOrders: { orderId: string; total: number; user: { name: string }; status: string }[];
+    recentOrders: { orderId: string; createdAt: string; total: number; user: { name: string }; status: string }[];
   } | null>(null);
   const { token } = useAdminAuth();
 
@@ -34,6 +34,11 @@ export default function AdminDashboard() {
   }, [token]);
 
   if (!data) return <div className="animate-pulse h-64 bg-gray-200 rounded-xl" />;
+
+  // Dynamically calculate "Orders Today" in the Admin's Local Timezone
+  // The backend provides all recent orders for the day OR we can calculate it from a dedicated endpoint. 
+  // Let's rely on backend's data.ordersToday for now, but we'll update the backend to use local time bounds or 24h trailing.
+  // Wait, let's just fix the backend `datetime` logic instead of frontend.
 
   return (
     <div>

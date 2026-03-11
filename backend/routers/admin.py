@@ -151,17 +151,18 @@ def update_admin_settings(settings_dict: dict, db: Session = Depends(get_db)):
 
 @router.get("/dashboard", response_model=schemas.DashboardResponse)
 def get_dashboard(db: Session = Depends(get_db)):
-    from datetime import datetime, time
+    from datetime import datetime, time, timedelta
     from sqlalchemy import func
     
-    today_start = datetime.combine(datetime.now().date(), time.min)
+    # Calculate Orders in the trailing 24 hours (safer for global timezone differences without complex tz queries)
+    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
     
     total_sales = db.query(func.sum(models.Order.total)).filter(
         models.Order.paymentStatus.in_(['paid', 'cod_pending'])
     ).scalar() or 0
     
     orders_today = db.query(models.Order).filter(
-        models.Order.createdAt >= today_start
+        models.Order.createdAt >= twenty_four_hours_ago
     ).count()
     
     pending_orders = db.query(models.Order).filter(
