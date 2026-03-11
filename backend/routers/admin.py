@@ -154,15 +154,27 @@ def get_dashboard(db: Session = Depends(get_db)):
     from datetime import datetime, time, timedelta
     from sqlalchemy import func
     
-    # Calculate Orders in the trailing 24 hours
-    twenty_four_hours_ago = datetime.utcnow() - timedelta(hours=24)
+    # Calculate "Today" strictly as 12:00 AM to 11:59 PM IST (UTC+5:30)
+    current_utc = datetime.utcnow()
+    current_ist = current_utc + timedelta(hours=5, minutes=30)
+    
+    # Start of today in IST
+    ist_midnight = datetime.combine(current_ist.date(), time.min)
+    # Convert IST midnight back to UTC for database querying
+    utc_start_of_day = ist_midnight - timedelta(hours=5, minutes=30)
+    
+    # End of today in IST
+    ist_end_of_day = datetime.combine(current_ist.date(), time.max)
+    # Convert IST 11:59 PM back to UTC
+    utc_end_of_day = ist_end_of_day - timedelta(hours=5, minutes=30)
     
     total_sales = db.query(func.sum(models.Order.total)).filter(
         models.Order.paymentStatus.in_(['paid', 'cod_pending'])
     ).scalar() or 0
     
     orders_today = db.query(models.Order).filter(
-        models.Order.createdAt >= twenty_four_hours_ago
+        models.Order.createdAt >= utc_start_of_day,
+        models.Order.createdAt <= utc_end_of_day
     ).count()
     
     pending_orders = db.query(models.Order).filter(

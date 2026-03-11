@@ -112,13 +112,17 @@ export default function AdminOrdersPage() {
 
   let filteredOrders = orders;
   if (filter === 'today') {
-    // Match the backend logic: trailing 24 hours instead of strict calendar day to avoid timezone disconnects
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    // strict calendar day to avoid timezone disconnects
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
 
     // Check if o.createdAt ends with Z. If not, append Z so Javascript parses it as UTC since SQLAlchemy stores naive UTC.
     filteredOrders = orders.filter(o => {
       const dateStr = o.createdAt.endsWith('Z') ? o.createdAt : `${o.createdAt}Z`;
-      return new Date(dateStr) >= twentyFourHoursAgo;
+      const orderDate = new Date(dateStr);
+      return orderDate >= startOfDay && orderDate <= endOfDay;
     });
   } else if (filter === 'pending') {
     filteredOrders = orders.filter(o => o.status === 'placed');
