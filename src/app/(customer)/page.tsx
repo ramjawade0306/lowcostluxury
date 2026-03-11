@@ -63,12 +63,12 @@ export default async function HomePage() {
                 <div className="absolute inset-0 border-2 border-accent/20 rounded-[3rem] -rotate-3 animate-float drop-shadow-2xl"></div>
 
                 {/* Dynamic Image or Stat Card */}
-                <div className="absolute top-[5%] -right-[15%] glass p-6 rounded-3xl animate-float shadow-2xl z-20" style={{ animationDelay: '-1s' }}>
+                <div className="hidden md:block absolute top-[5%] -right-[5%] md:-right-[15%] glass p-6 rounded-3xl animate-float shadow-2xl z-20" style={{ animationDelay: '-1s' }}>
                   <div className="text-accent font-black text-2xl">99%</div>
                   <div className="text-[10px] font-bold text-gray-500 tracking-widest leading-tight">POSITIVE<br />REVIEWS</div>
                 </div>
 
-                <div className="absolute bottom-[10%] -left-[10%] glass p-6 rounded-3xl animate-float shadow-2xl z-20" style={{ animationDelay: '-3s' }}>
+                <div className="hidden md:block absolute bottom-[15%] -right-[5%] md:-right-[10%] glass p-6 rounded-3xl animate-float shadow-2xl z-20" style={{ animationDelay: '-3s' }}>
                   <div className="flex items-center gap-2 mb-1">
                     <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
                     <div className="text-[10px] font-bold text-gray-400 tracking-widest leading-tight">GENUINE QUALITY</div>
