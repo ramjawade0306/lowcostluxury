@@ -54,26 +54,41 @@ export default async function HomePage() {
                   VIEW DEALS
                 </Link>
               </div>
+
+              {/* Mobile-only Stats Row (prevents completely any overlap on small screens) */}
+              <div className="flex md:hidden gap-4 mt-8 justify-center">
+                <div className="glass p-4 rounded-2xl animate-float shadow-xl flex-1 flex flex-col justify-center items-center text-center" style={{ animationDelay: '-1s' }}>
+                  <div className="text-accent font-black text-xl">99%</div>
+                  <div className="text-[10px] font-bold text-gray-500 tracking-widest leading-tight mt-1">POSITIVE<br />REVIEWS</div>
+                </div>
+                <div className="glass p-4 rounded-2xl animate-float shadow-xl flex-1 flex flex-col justify-center items-center text-center" style={{ animationDelay: '-3s' }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></div>
+                    <div className="text-[10px] font-bold text-gray-400 tracking-widest leading-tight">GENUINE</div>
+                  </div>
+                  <div className="text-gray-900 font-black text-sm underline decoration-accent decoration-2">100% ASSURED</div>
+                </div>
+              </div>
             </div>
 
-            <div className="flex-1 relative">
+            <div className="flex-1 relative mt-12 md:mt-0">
               <div className="relative w-full aspect-square max-w-md mx-auto">
                 {/* Visual Eye-catcher: Abstract Floating elements */}
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent rounded-[3rem] rotate-6 animate-pulse-slow"></div>
                 <div className="absolute inset-0 border-2 border-accent/20 rounded-[3rem] -rotate-3 animate-float drop-shadow-2xl"></div>
 
-                {/* Dynamic Image or Stat Card */}
-                <div className="absolute top-0 md:top-[5%] -right-[10%] md:-right-[15%] glass p-4 md:p-6 rounded-2xl md:rounded-3xl animate-float shadow-xl md:shadow-2xl z-20 scale-75 md:scale-100 origin-top-right" style={{ animationDelay: '-1s' }}>
-                  <div className="text-accent font-black text-xl md:text-2xl">99%</div>
-                  <div className="text-[8px] md:text-[10px] font-bold text-gray-500 tracking-widest leading-tight">POSITIVE<br />REVIEWS</div>
+                {/* Desktop-only Floating Stat Cards */}
+                <div className="hidden md:block absolute top-[5%] -right-[15%] glass p-6 rounded-3xl animate-float shadow-2xl z-20 origin-top-right" style={{ animationDelay: '-1s' }}>
+                  <div className="text-accent font-black text-2xl">99%</div>
+                  <div className="text-[10px] font-bold text-gray-500 tracking-widest leading-tight">POSITIVE<br />REVIEWS</div>
                 </div>
 
-                <div className="absolute bottom-0 md:bottom-[15%] -right-[10%] md:-right-[10%] glass p-4 md:p-6 rounded-2xl md:rounded-3xl animate-float shadow-xl md:shadow-2xl z-20 scale-75 md:scale-100 origin-bottom-right" style={{ animationDelay: '-3s' }}>
+                <div className="hidden md:block absolute bottom-[15%] -right-[10%] glass p-6 rounded-3xl animate-float shadow-2xl z-20 origin-bottom-right" style={{ animationDelay: '-3s' }}>
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-accent animate-pulse"></div>
-                    <div className="text-[8px] md:text-[10px] font-bold text-gray-400 tracking-widest leading-tight">GENUINE QUALITY</div>
+                    <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+                    <div className="text-[10px] font-bold text-gray-400 tracking-widest leading-tight">GENUINE QUALITY</div>
                   </div>
-                  <div className="text-gray-900 font-black text-base md:text-lg underline decoration-accent decoration-2">100% ASSURED</div>
+                  <div className="text-gray-900 font-black text-lg underline decoration-accent decoration-2">100% ASSURED</div>
                 </div>
 
                 {/* Main Hero Visual Placeholder/Image */}
