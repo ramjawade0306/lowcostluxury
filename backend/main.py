@@ -4,12 +4,37 @@ from fastapi.staticfiles import StaticFiles
 import os
 import models
 from database import engine
-from routers import about_shop, products, categories, auth, orders, reviews, payment, admin, user, coupons, uploads, public_settings
+from routers import about_shop, products, categories, auth, orders, reviews, payment, admin, user, coupons, uploads
 
 # Create tables if they don't exist
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Low price luxury API")
+
+@app.on_event("startup")
+def startup_event():
+    from database import SessionLocal
+    from auth_utils import get_password_hash
+    db = SessionLocal()
+    try:
+        # Check if admin exists
+        admin = db.query(models.Admin).first()
+        if not admin:
+            print("No admin found. Seeding default admin...")
+            new_admin = models.Admin(
+                id="1",
+                email="admin@dealstore.com",
+                phone="9876543210",
+                password=get_password_hash("admin123"),
+                name="Admin"
+            )
+            db.add(new_admin)
+            db.commit()
+            print("Default admin created successfully.")
+    except Exception as e:
+        print(f"Error seeding admin: {e}")
+    finally:
+        db.close()
 
 # Ensure uploads directory exists
 if not os.path.exists("uploads"):
@@ -45,4 +70,3 @@ app.include_router(admin.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
 app.include_router(coupons.router, prefix="/api")
 app.include_router(uploads.router, prefix="/api")
-app.include_router(public_settings.router, prefix="/api")
