@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import { getMediaUrl } from '@/lib/utils';
 
 interface MediaUploadProps {
     value: string; // Comma-separated URLs or single URL
@@ -95,7 +96,7 @@ export default function MediaUpload({ value, onChange, multiple = false, label, 
                             </div>
                         ) : (
                             <Image
-                                src={url}
+                                src={getMediaUrl(url)}
                                 alt="Preview"
                                 fill
                                 className="object-cover"

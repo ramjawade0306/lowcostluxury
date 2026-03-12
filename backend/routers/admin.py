@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
-from typing import List
+from typing import List, Optional
 from uuid import uuid4
 import models, schemas
 from database import get_db
@@ -15,11 +15,20 @@ def get_all_users(db: Session = Depends(get_db)):
     return db.query(models.User).order_by(models.User.createdAt.desc()).all()
 
 @router.get("/orders", response_model=List[schemas.OrderAdmin])
-def get_all_orders(db: Session = Depends(get_db)):
-    orders = db.query(models.Order).options(
+def get_all_orders(search: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(models.Order).options(
         joinedload(models.Order.user),
         joinedload(models.Order.items).joinedload(models.OrderItem.product)
-    ).order_by(models.Order.createdAt.desc()).all()
+    )
+    
+    if search:
+        query = query.filter(
+            (models.Order.orderId.ilike(f"%{search}%")) |
+            (models.Order.phone.ilike(f"%{search}%")) |
+            (models.Order.address.ilike(f"%{search}%"))
+        )
+        
+    orders = query.order_by(models.Order.createdAt.desc()).all()
     return orders
 
 @router.patch("/orders/{order_id}", response_model=schemas.Order)
@@ -46,8 +55,16 @@ def update_order_status(order_id: str, update: dict, db: Session = Depends(get_d
     return db_order
 
 @router.get("/products", response_model=List[schemas.ProductAdmin])
-def get_admin_products(db: Session = Depends(get_db)):
-    return db.query(models.Product).options(joinedload(models.Product.category)).all()
+def get_admin_products(search: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(models.Product).options(joinedload(models.Product.category))
+    
+    if search:
+        query = query.filter(
+            (models.Product.name.ilike(f"%{search}%")) |
+            (models.Product.description.ilike(f"%{search}%"))
+        )
+        
+    return query.all()
 
 @router.post("/products", response_model=schemas.Product)
 def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)):
@@ -84,7 +101,11 @@ def delete_product(product_id: str, db: Session = Depends(get_db)):
 
 @router.get("/categories", response_model=List[schemas.Category])
 def get_admin_categories(db: Session = Depends(get_db)):
-    return db.query(models.Category).all()
+    from sqlalchemy import func
+    categories = db.query(models.Category).all()
+    for cat in categories:
+        cat.count = {"products": db.query(models.Product).filter(models.Product.categoryId == cat.id).count()}
+    return categories
 
 @router.post("/categories", response_model=schemas.Category)
 def create_category(cat: schemas.CategoryCreate, db: Session = Depends(get_db)):

@@ -6,24 +6,26 @@
   --accent: #f97316;
   --accent-dark: #ea580c;
   --accent-light: #fdba74;
-  --deal: #22c55e;
+  --deal: #10b981; /* emerald-500 */
+  --hot: #f43f5e;  /* rose-500 */
 
-  --bg-top: #f8fafc;
-  --bg-bottom: #e2e8f0;
-  --mesh-color-1: rgba(249, 115, 22, 0.4);
-  /* vibrant orange */
-  --mesh-color-2: rgba(59, 130, 246, 0.35);
-  /* vibrant blue */
-  --mesh-color-3: rgba(168, 85, 247, 0.35);
-  /* vibrant purple */
-  --mesh-color-4: rgba(34, 197, 94, 0.3);
-  /* vibrant green */
-  --mesh-color-5: rgba(236, 72, 153, 0.35);
-  /* vibrant pink */
+  --bg-top: #fffcf9;
+  --bg-bottom: #fdf2f8;
+  
+  --mesh-color-1: rgba(249, 115, 22, 0.2);
+  /* orange-500 */
+  --mesh-color-2: rgba(251, 146, 60, 0.15);
+  /* orange-400 */
+  --mesh-color-3: rgba(245, 158, 11, 0.12);
+  /* amber-500 */
+  --mesh-color-4: rgba(251, 113, 133, 0.1);
+  /* rose-400 */
+  --mesh-color-5: rgba(254, 215, 170, 0.15);
+  /* orange-200 */
 
-  --premium-glass: rgba(255, 255, 255, 0.85);
-  --premium-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+  --premium-glass: rgba(255, 255, 255, 0.7);
+  --premium-shadow: 0 20px 50px -12px rgba(249, 115, 22, 0.08);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 @keyframes float {

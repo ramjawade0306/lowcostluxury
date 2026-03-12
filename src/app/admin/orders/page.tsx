@@ -17,7 +17,14 @@ type Order = {
   phone: string;
   createdAt: string;
   user: { name: string; email: string };
-  items: { id: string; product: { name: string; images: string }; quantity: number; price: number; returnStatus?: string; returnReason?: string; replacementStatus?: string }[];
+  items: { 
+    id: string; 
+    product: { name: string; images: string }; 
+    quantity: number; 
+    price: number; 
+    replacementStatus?: string; 
+    replacementReason?: string 
+  }[];
 };
 
 export default function AdminOrdersPage() {
@@ -35,7 +42,11 @@ export default function AdminOrdersPage() {
       setLoading(false);
       return;
     }
-    fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` } })
+    const params = new URLSearchParams();
+    const search = searchParams.get('search');
+    if (search) params.set('search', search);
+
+    fetch(`/api/admin/orders?${params}`, { headers: { Authorization: `Bearer ${token}` } })
       .then(async (r) => {
         const text = await r.text();
         if (!text) return [];
@@ -52,7 +63,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     load();
-  }, [token]);
+  }, [token, searchParams]);
 
   const updateStatus = async (id: string, newStatus: string, trackingId: string | null = null) => {
     // Optimistically update the UI
@@ -91,18 +102,18 @@ export default function AdminOrdersPage() {
     setTrackingModal({ orderId: '', open: false });
   };
 
-  const updateReturnStatus = async (itemId: string, status: string) => {
+  const updateReplacementStatus = async (itemId: string, status: string) => {
     try {
       const res = await fetch(`/api/admin/order-items/${itemId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ returnStatus: status }),
+        body: JSON.stringify({ replacementStatus: status }),
       });
       if (!res.ok) throw new Error();
       load();
-      toast.success('Return status updated');
+      toast.success('Replacement status updated');
     } catch {
-      toast.error('Failed to update return status');
+      toast.error('Failed to update replacement status');
     }
   };
 
@@ -184,26 +195,26 @@ export default function AdminOrdersPage() {
                   <div className="flex-1">
                     <div className="font-medium">{item.product?.name}</div>
                     <div className="text-gray-500">Qty: {item.quantity} × {formatPrice(item.price)}</div>
-                    {item.returnStatus && (
+                    {item.replacementStatus && (
                       <div className="mt-1">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-bold uppercase ${item.returnStatus === 'requested' ? 'bg-yellow-100 text-yellow-700' :
-                          item.returnStatus === 'approved' ? 'bg-blue-100 text-blue-700' :
-                            item.returnStatus === 'refunded' ? 'bg-green-100 text-green-700' :
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-bold uppercase ${item.replacementStatus === 'requested' ? 'bg-yellow-100 text-yellow-700' :
+                          item.replacementStatus === 'approved' ? 'bg-blue-100 text-blue-700' :
+                            item.replacementStatus === 'replaced' ? 'bg-green-100 text-green-700' :
                               'bg-red-100 text-red-700'
                           }`}>
-                          Return: {item.returnStatus}
+                          Replacement: {item.replacementStatus}
                         </span>
-                        {item.returnReason && <div className="text-xs text-gray-400 mt-1 italic">Reason: {item.returnReason}</div>}
+                        {item.replacementReason && <div className="text-xs text-gray-400 mt-1 italic">Reason: {item.replacementReason}</div>}
 
-                        {item.returnStatus === 'requested' && (
+                        {item.replacementStatus === 'requested' && (
                           <div className="flex gap-2 mt-2">
-                            <button onClick={() => updateReturnStatus(item.id, 'approved')} className="text-xs bg-accent text-white px-2 py-1 rounded">Approve</button>
-                            <button onClick={() => updateReturnStatus(item.id, 'rejected')} className="text-xs bg-gray-200 px-2 py-1 rounded">Reject</button>
+                            <button onClick={() => updateReplacementStatus(item.id, 'approved')} className="text-xs bg-accent text-white px-2 py-1 rounded">Approve</button>
+                            <button onClick={() => updateReplacementStatus(item.id, 'rejected')} className="text-xs bg-gray-200 px-2 py-1 rounded">Reject</button>
                           </div>
                         )}
-                        {item.returnStatus === 'approved' && (
+                        {item.replacementStatus === 'approved' && (
                           <div className="mt-2 text-xs">
-                            <button onClick={() => updateReturnStatus(item.id, 'refunded')} className="bg-green-600 text-white px-2 py-1 rounded">Mark as Refunded</button>
+                            <button onClick={() => updateReplacementStatus(item.id, 'replaced')} className="bg-green-600 text-white px-2 py-1 rounded">Mark as Replaced</button>
                           </div>
                         )}
                       </div>

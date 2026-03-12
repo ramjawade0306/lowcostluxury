@@ -30,7 +30,7 @@ export default function CartPage() {
             const finalPrice = calcDiscount(item.price, item.discount);
             return (
               <div key={item.productId} className="card p-4 flex gap-4">
-                <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-accent/5 flex-shrink-0">
                   <Image src={item.image} alt={item.name} fill className="object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -56,7 +56,7 @@ export default function CartPage() {
                     </div>
                     <button
                       onClick={() => removeItem(item.productId)}
-                      className="text-red-500 text-sm hover:underline"
+                      className="text-hot text-sm hover:underline"
                     >
                       Remove
                     </button>

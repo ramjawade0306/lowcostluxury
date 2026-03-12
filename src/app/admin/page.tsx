@@ -33,7 +33,7 @@ export default function AdminDashboard() {
       .catch(() => setData(null));
   }, [token]);
 
-  if (!data) return <div className="animate-pulse h-64 bg-gray-200 rounded-xl" />;
+  if (!data) return <div className="animate-pulse h-64 bg-accent/5 rounded-xl" />;
 
   // Dynamically calculate "Orders Today" in the Admin's Local Timezone
   // The backend provides all recent orders for the day OR we can calculate it from a dedicated endpoint. 
@@ -58,15 +58,15 @@ export default function AdminDashboard() {
         </div>
         <Link href="/admin/products?filter=low-stock" className="card p-6 block hover:shadow-md transition-shadow cursor-pointer">
           <div className="text-gray-500 text-sm">Low Stock Alert</div>
-          <div className={`text-2xl font-bold ${data.lowStock > 0 ? 'text-red-600' : ''}`}>{data.lowStock}</div>
+          <div className={`text-2xl font-bold ${data.lowStock > 0 ? 'text-hot' : ''}`}>{data.lowStock}</div>
         </Link>
-        <Link href="/admin/orders?filter=pending" className="card p-6 bg-blue-50/50 block hover:shadow-md transition-shadow cursor-pointer">
-          <div className="text-gray-500 text-sm">Pending Orders</div>
-          <div className="text-2xl font-bold text-blue-700">{data.pendingOrders}</div>
+        <Link href="/admin/orders?filter=pending" className="card p-6 bg-sky-50/50 block hover:shadow-md transition-shadow cursor-pointer border-sky-100">
+          <div className="text-sky-600 font-bold text-[10px] uppercase tracking-widest mb-1">Pending Orders</div>
+          <div className="text-2xl font-black text-sky-800">{data.pendingOrders}</div>
         </Link>
-        <Link href="/admin/orders?filter=replacements" className="card p-6 bg-yellow-50/50 block hover:shadow-md transition-shadow cursor-pointer">
-          <div className="text-gray-500 text-sm">Replacements</div>
-          <div className="text-2xl font-bold text-yellow-700">{data.replacementRequests}</div>
+        <Link href="/admin/orders?filter=replacements" className="card p-6 bg-amber-50/50 block hover:shadow-md transition-shadow cursor-pointer border-amber-100">
+          <div className="text-amber-600 font-bold text-[10px] uppercase tracking-widest mb-1">Replacements</div>
+          <div className="text-2xl font-black text-amber-800">{data.replacementRequests}</div>
         </Link>
       </div>
       <div className="card overflow-hidden">
@@ -79,7 +79,7 @@ export default function AdminDashboard() {
               <Link
                 key={o.orderId}
                 href={`/admin/orders?id=${o.orderId}`}
-                className="flex items-center justify-between p-4 hover:bg-gray-50"
+                className="flex items-center justify-between p-4 hover:bg-accent/[0.02] transition-colors"
               >
                 <span className="font-mono">{o.orderId}</span>
                 <span>{o.user?.name}</span>

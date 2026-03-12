@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useAdminAuth } from '@/context/AdminAuthContext';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, getMediaUrl } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import MediaUpload from '@/components/MediaUpload';
 
@@ -45,6 +45,7 @@ export default function AdminProductsPage() {
   });
   const searchParams = useSearchParams();
   const filter = searchParams.get('filter');
+  const categoryFilter = searchParams.get('category');
   const { token } = useAdminAuth();
 
   const parseJson = async (r: Response, fallback: unknown) => {
@@ -62,8 +63,12 @@ export default function AdminProductsPage() {
       setLoading(false);
       return;
     }
+    const params = new URLSearchParams();
+    const search = searchParams.get('search');
+    if (search) params.set('search', search);
+
     Promise.all([
-      fetch('/api/admin/products', { headers: { Authorization: `Bearer ${token}` } }).then((r) => parseJson(r, [])),
+      fetch(`/api/admin/products?${params}`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => parseJson(r, [])),
       fetch('/api/admin/categories', { headers: { Authorization: `Bearer ${token}` } }).then((r) => parseJson(r, [])),
     ]).then(([prods, cats]) => {
       setProducts(prods);
@@ -73,7 +78,7 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     load();
-  }, [token]);
+  }, [token, searchParams]);
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,9 +116,13 @@ export default function AdminProductsPage() {
     }
   };
 
-  const filteredProducts = filter === 'low-stock'
+  let filteredProducts = filter === 'low-stock'
     ? products.filter(p => p.stock < 10 && !p.isSoldOut)
     : products;
+
+  if (categoryFilter) {
+    filteredProducts = filteredProducts.filter(p => p.category?.id === categoryFilter);
+  }
 
   return (
     <div>
@@ -121,21 +130,21 @@ export default function AdminProductsPage() {
         <h1 className="text-2xl font-bold flex items-center gap-3">
           Products
           {filter && (
-            <span className="text-sm font-normal bg-gray-200 text-gray-700 px-3 py-1 rounded-full capitalize">
+            <span className="text-[10px] font-black tracking-widest bg-accent/10 text-accent px-3 py-1 rounded-full uppercase">
               Filter: {filter.replace('-', ' ')}
             </span>
           )}
         </h1>
         <div className="flex items-center gap-4">
-          {filter && (
+          {(filter || categoryFilter) && (
             <button
               onClick={() => window.location.href = '/admin/products'}
               className="text-sm text-accent hover:underline"
             >
-              Clear Filter
+              Clear {categoryFilter ? 'Category' : 'Filter'}
             </button>
           )}
-          <button onClick={() => { setEditing(null); setShowForm(true); }} className="btn-primary">
+          <button onClick={() => { setEditing(null); setShowForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="btn-primary">
             + Add Product
           </button>
         </div>
@@ -205,7 +214,7 @@ export default function AdminProductsPage() {
             value={form.images}
             onChange={(val) => setForm(f => ({ ...f, images: val }))}
             multiple={true}
-            accept="image/*"
+            accept="image/*,video/*"
           />
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={form.isHotDeal} onChange={(e) => setForm((f) => ({ ...f, isHotDeal: e.target.checked }))} />
@@ -227,13 +236,13 @@ export default function AdminProductsPage() {
       )}
 
       {loading ? (
-        <div className="animate-pulse h-48 bg-gray-200 rounded-xl" />
+        <div className="animate-pulse h-48 bg-accent/5 rounded-xl" />
       ) : (
         <div className="card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
+              <thead className="bg-accent/[0.02]">
+                <tr className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                   <th className="text-left p-4">Product</th>
                   <th className="text-left p-4">Price</th>
                   <th className="text-left p-4">Stock</th>
@@ -250,8 +259,8 @@ export default function AdminProductsPage() {
                   <tr key={p.id} className="border-t">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="relative w-12 h-12 rounded overflow-hidden bg-gray-100">
-                          <Image src={p.images?.split(',')[0]?.trim() || '/placeholder.svg'} alt="" fill className="object-cover" />
+                        <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-accent/5">
+                          <Image src={getMediaUrl(p.images?.split(',')?.[0]?.trim())} alt="" fill className="object-cover" />
                         </div>
                         <div>
                           <div className="font-medium">{p.name}</div>
@@ -261,13 +270,13 @@ export default function AdminProductsPage() {
                     </td>
                     <td className="p-4">{formatPrice(p.price)} {p.discount > 0 && `(-${p.discount}%)`}</td>
                     <td className="p-4">{p.stock}</td>
-                    <td className="p-4">
-                      {p.isSoldOut ? <span className="text-red-600">Sold Out</span> : p.isHotDeal ? <span className="text-accent">Hot</span> : '-'}
-                      {p.isReturnable && <span className="ml-2 text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">Returnable</span>}
+                    <td className="p-4 text-sm font-medium">
+                      {p.isSoldOut ? <span className="text-hot font-black uppercase tracking-widest text-[10px]">Sold Out</span> : p.isHotDeal ? <span className="text-accent font-black uppercase tracking-widest text-[10px]">Hot</span> : '-'}
+                      {p.isReturnable && <span className="ml-2 text-[9px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">Returnable</span>}
                     </td>
-                    <td className="p-4">
-                      <button onClick={() => { setEditing(p); setForm({ name: p.name, description: p.description || '', price: p.price, discount: p.discount, stock: p.stock, categoryId: p.category?.id || '', images: p.images || '', isHotDeal: p.isHotDeal, isSoldOut: p.isSoldOut, isReturnable: p.isReturnable }); setShowForm(true); }} className="text-accent text-sm mr-2">Edit</button>
-                      <button onClick={() => remove(p.id)} className="text-red-500 text-sm">Delete</button>
+                    <td className="p-4 text-right">
+                      <button onClick={() => { setEditing(p); setForm({ name: p.name, description: p.description || '', price: p.price, discount: p.discount, stock: p.stock, categoryId: p.category?.id || '', images: p.images || '', isHotDeal: p.isHotDeal, isSoldOut: p.isSoldOut, isReturnable: p.isReturnable }); setShowForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-accent hover:underline font-bold text-sm mr-4">Edit</button>
+                      <button onClick={() => remove(p.id)} className="text-hot hover:underline font-medium text-sm">Delete</button>
                     </td>
                   </tr>
                 ))}

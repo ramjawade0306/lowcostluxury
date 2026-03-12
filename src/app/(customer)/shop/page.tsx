@@ -52,30 +52,56 @@ function ShopInner() {
     <div className="max-w-6xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6">Shop</h1>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <input
-          type="search"
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="input flex-1"
-        />
-        <select value={category} onChange={(e) => setCategory(e.target.value)} className="input w-full sm:w-48">
-          <option value="">All Categories</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-        <select value={sort} onChange={(e) => setSort(e.target.value)} className="input w-full sm:w-40">
-          <option value="newest">Newest</option>
-          <option value="price_asc">Price: Low to High</option>
-          <option value="price_desc">Price: High to Low</option>
-          <option value="discount">Best Discounts</option>
-        </select>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" checked={hotDeals} onChange={(e) => setHotDeals(e.target.checked)} />
-          <span className="text-sm">Hot Deals</span>
-        </label>
+      <div className="flex flex-col lg:flex-row gap-6 mb-12">
+        <div className="flex-1 flex gap-2">
+          <div className="relative flex-1 group">
+            <input
+              type="search"
+              placeholder="Search products..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="input w-full pl-10 h-12 rounded-xl border-gray-100 focus:border-accent group-hover:bg-accent/5 transition-all"
+            />
+            <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 group-hover:text-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <button className="btn-primary h-12 px-6 rounded-xl flex items-center gap-2 font-black uppercase tracking-widest text-xs">
+            Search
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Filter:</span>
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="input h-10 px-4 rounded-lg text-sm border-gray-100 hover:border-accent transition-all cursor-pointer">
+              <option value="">All Categories</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sort:</span>
+            <select value={sort} onChange={(e) => setSort(e.target.value)} className="input h-10 px-4 rounded-lg text-sm border-gray-100 hover:border-accent transition-all cursor-pointer">
+              <option value="newest">Newest first</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="discount">Highest Discount</option>
+            </select>
+          </div>
+
+          <label className="flex items-center gap-3 cursor-pointer group bg-white/50 px-4 py-2 rounded-lg border border-gray-100 hover:border-accent transition-all">
+            <input 
+              type="checkbox" 
+              checked={hotDeals} 
+              onChange={(e) => setHotDeals(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-accent focus:ring-accent"
+            />
+            <span className="text-xs font-black text-gray-400 group-hover:text-accent transition-colors uppercase tracking-widest">Hot Deals</span>
+          </label>
+        </div>
       </div>
 
       {loading ? (

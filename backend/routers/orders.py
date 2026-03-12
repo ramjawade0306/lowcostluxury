@@ -86,7 +86,22 @@ def create_order(order: schemas.OrderCreate, current_user: models.User = Depends
         )
         db.add(db_order)
         
+        # 6. Create Order Items and Update Stock
         for item in order.items:
+            # Fetch product to check stock
+            product = db.query(models.Product).filter(models.Product.id == item.productId).first()
+            if not product:
+                raise HTTPException(status_code=404, detail=f"Product {item.productId} not found")
+            
+            if product.stock < item.quantity:
+                raise HTTPException(status_code=400, detail=f"Insufficient stock for {product.name}. Available: {product.stock}")
+            
+            # Deduct stock
+            product.stock -= item.quantity
+            if product.stock <= 0:
+                product.stock = 0
+                product.isSoldOut = True
+            
             db_item = models.OrderItem(
                 id=str(uuid4()),
                 orderId=db_order.id,
@@ -121,33 +136,6 @@ def create_order(order: schemas.OrderCreate, current_user: models.User = Depends
 def get_user_orders(user_id: str, db: Session = Depends(get_db)):
     return db.query(models.Order).filter(models.Order.userId == user_id).order_by(models.Order.createdAt.desc()).all()
 
-@router.post("/return/{item_id}")
-def request_return(item_id: str, reason: str, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # 1. Find the order item
-    item = db.query(models.OrderItem).filter(models.OrderItem.id == item_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Order item not found")
-        
-    # 2. Verify order belongs to user
-    order = db.query(models.Order).filter(models.Order.id == item.orderId, models.Order.userId == current_user.id).first()
-    if not order:
-        raise HTTPException(status_code=403, detail="Unauthorized")
-        
-    # 3. Verify product is returnable
-    product = db.query(models.Product).filter(models.Product.id == item.productId).first()
-    if not product or not product.isReturnable:
-        raise HTTPException(status_code=400, detail="Product is not returnable")
-        
-    # 4. Verify order status (should be delivered for return)
-    if order.status != "delivered":
-        raise HTTPException(status_code=400, detail="Order must be delivered to request a return")
-        
-    # 5. Update item return status
-    item.returnStatus = "requested"
-    item.returnReason = reason
-    db.commit()
-    
-    return {"message": "Return request submitted successfully"}
 
 @router.post("/replacement/{item_id}")
 def request_replacement(item_id: str, reason: str, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):

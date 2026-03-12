@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { formatPrice, calcDiscount } from '@/lib/utils';
+import { formatPrice, calcDiscount, getMediaUrl } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 type Product = {
@@ -57,7 +57,7 @@ export default function ProductPage() {
     );
   }
 
-  const images = product.images?.split(',').filter(Boolean) || [];
+  const images = (product.images?.split(',').filter(Boolean) || []).map(img => getMediaUrl(img.trim()));
   const mainImg = images[imgIdx] || images[0] || '/placeholder.svg';
   const finalPrice = calcDiscount(product.price, product.discount);
   const canAdd = !product.isSoldOut && product.stock >= qty;
@@ -90,27 +90,54 @@ export default function ProductPage() {
     router.push('/checkout');
   };
 
+  const isVideo = (url: string) => {
+    const ext = url.split('.').pop()?.split('?')[0].toLowerCase();
+    return ['mp4', 'mov', 'avi', 'webm'].includes(ext || '');
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
       <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-2">
-          <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden">
-            <Image src={mainImg} alt={product.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+        <div className="space-y-4">
+          <div className="relative aspect-square bg-black rounded-3xl overflow-hidden shadow-2xl group flex items-center justify-center">
+            {isVideo(mainImg) ? (
+              <video
+                src={mainImg}
+                controls
+                autoPlay
+                muted
+                playsInline
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <Image src={mainImg} alt={product.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+            )}
             {product.discount > 0 && (
-              <span className="absolute top-4 left-4 bg-accent text-white font-bold px-3 py-1 rounded">
+              <span className="absolute top-6 left-6 bg-accent text-white font-black px-4 py-1.5 rounded-full shadow-lg shadow-accent/30 z-10">
                 {product.discount}% OFF
               </span>
             )}
           </div>
           {images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide py-2 px-1">
               {images.map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setImgIdx(i)}
-                  className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 ${imgIdx === i ? 'border-accent' : 'border-transparent'}`}
+                  className={`relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border-2 transition-all duration-300 shadow-md ${imgIdx === i ? 'border-accent scale-105 shadow-accent/20' : 'border-white hover:border-accent/40'}`}
                 >
-                  <Image src={img} alt="" fill className="object-cover" />
+                  {isVideo(img) ? (
+                    <div className="relative w-full h-full bg-black flex items-center justify-center">
+                      <video src={img} className="w-full h-full object-cover opacity-60" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M6.3 2.841A.7.7 0 005 3.41V16.59a.7.7 0 001.3.569l10.7-6.59a.7.7 0 000-1.138l-10.7-6.59z" />
+                        </svg>
+                      </div>
+                    </div>
+                  ) : (
+                    <Image src={img} alt="" fill className="object-cover" />
+                  )}
                 </button>
               ))}
             </div>
@@ -126,11 +153,15 @@ export default function ProductPage() {
               <span className="text-gray-400 line-through">{formatPrice(product.price)}</span>
             )}
           </div>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm font-bold mb-4">
             {product.stock > 0 ? (
-              <span className="text-green-600">In stock ({product.stock} available)</span>
+              product.stock < 10 ? (
+                <span className="text-accent animate-pulse text-xs">🔥 Hurry! Only {product.stock} items remaining!</span>
+              ) : (
+                <span className="text-emerald-500">In stock</span>
+              )
             ) : (
-              <span className="text-red-600">Out of stock</span>
+              <span className="text-hot">Out of stock</span>
             )}
           </p>
           <p className="text-gray-700 mb-6 whitespace-pre-line">{product.description}</p>
@@ -178,29 +209,27 @@ export default function ProductPage() {
         </div>
       </div>
 
-      {related.length > 0 && (
         <section className="mt-16">
           <h2 className="text-xl font-bold mb-4">Related Products</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {related.map((p) => (
-              <Link key={p.id} href={`/product/${p.slug}`} className="card block">
-                <div className="relative aspect-square bg-gray-100">
+              <Link key={p.id} href={`/product/${p.slug}`} className="card group block">
+                <div className="relative aspect-square bg-gray-50 overflow-hidden">
                   <Image
-                    src={p.images?.split(',')[0]?.trim() || '/placeholder.svg'}
+                    src={getMediaUrl(p.images?.split(',')[0]?.trim()) || '/placeholder.svg'}
                     alt={p.name}
                     fill
-                    className="object-cover"
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-sm line-clamp-2">{p.name}</h3>
-                  <span className="text-accent font-bold text-sm">{formatPrice(calcDiscount(p.price, p.discount))}</span>
+                <div className="p-4">
+                  <h3 className="font-bold text-gray-800 text-sm line-clamp-2 min-h-[2.5rem] group-hover:text-accent transition-colors">{p.name}</h3>
+                  <span className="text-accent font-black text-sm">{formatPrice(calcDiscount(p.price, p.discount))}</span>
                 </div>
               </Link>
             ))}
           </div>
         </section>
-      )}
     </div>
   );
 }

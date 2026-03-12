@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import toast from 'react-hot-toast';
+import { getMediaUrl } from '@/lib/utils';
 import MediaUpload from '@/components/MediaUpload';
 import Image from 'next/image';
+import Link from 'next/link';
 
 type Category = { id: string; name: string; slug: string; image?: string; _count?: { products: number } };
 
@@ -85,7 +87,7 @@ export default function AdminCategoriesPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Categories</h1>
-        <button onClick={() => { setEditing(null); setName(''); setImage(''); setShowForm(true); }} className="btn-primary">
+        <button onClick={() => { setEditing(null); setName(''); setImage(''); setShowForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="btn-primary">
           + Add Category
         </button>
       </div>
@@ -107,7 +109,7 @@ export default function AdminCategoriesPage() {
             value={image}
             onChange={setImage}
             multiple={false}
-            accept="image/*"
+            accept="image/*,video/*"
           />
           <div className="flex gap-2">
             <button type="submit" className="btn-primary">Save</button>
@@ -135,15 +137,17 @@ export default function AdminCategoriesPage() {
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="relative w-10 h-10 rounded overflow-hidden bg-gray-100 border border-gray-200">
-                        <Image src={c.image || '/placeholder.svg'} alt="" fill className="object-cover" />
+                        <Image src={getMediaUrl(c.image)} alt="" fill className="object-cover" />
                       </div>
-                      <span className="font-medium text-gray-900">{c.name}</span>
+                      <Link href={`/admin/products?category=${c.id}`} className="font-medium text-accent hover:underline">
+                        {c.name}
+                      </Link>
                     </div>
                   </td>
                   <td className="p-4 text-gray-500">{c.slug}</td>
                   <td className="p-4">{c._count?.products ?? 0}</td>
                   <td className="p-4">
-                    <button onClick={() => { setEditing(c); setName(c.name); setImage(c.image || ''); setShowForm(true); }} className="text-accent text-sm mr-2">Edit</button>
+                    <button onClick={() => { setEditing(c); setName(c.name); setImage(c.image || ''); setShowForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-accent text-sm mr-2">Edit</button>
                     <button onClick={() => remove(c.id)} className="text-red-500 text-sm">Delete</button>
                   </td>
                 </tr>
