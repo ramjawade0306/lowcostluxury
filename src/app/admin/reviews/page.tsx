@@ -109,16 +109,22 @@ export default function AdminReviewsPage() {
       )}
 
       {loading ? (
-        <div className="animate-pulse h-48 bg-gray-200 rounded-xl" />
+        <div className="animate-pulse h-48 bg-accent/5 rounded-xl" />
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {reviews.map((r) => (
             <div key={r.id} className="card p-6">
               <div className="flex items-center gap-4">
-                <Image src={r.image} alt={r.name} width={48} height={48} className="rounded-full" />
+                <div className="relative w-12 h-12 rounded-full overflow-hidden bg-accent/5">
+                  <Image src={r.image} alt={r.name} fill className="object-cover" />
+                </div>
                 <div>
-                  <div className="font-medium">{r.name}</div>
-                  <div className="text-yellow-500">{'★'.repeat(r.rating)}</div>
+                  <div className="font-bold text-gray-900">{r.name}</div>
+                  <div className="text-accent flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={i} className={i < r.rating ? 'text-accent' : 'text-gray-200'}>★</span>
+                    ))}
+                  </div>
                 </div>
               </div>
               {r.comment && <p className="mt-2 text-gray-600 text-sm">{r.comment}</p>}

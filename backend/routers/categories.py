@@ -9,6 +9,9 @@ router = APIRouter(
     tags=["categories"]
 )
 
-@router.get("/")
+@router.get("/", response_model=List[schemas.Category])
 def get_categories(db: Session = Depends(get_db)):
-    return db.query(models.Category).order_by(models.Category.name).all()
+    categories = db.query(models.Category).order_by(models.Category.name).all()
+    for cat in categories:
+        cat.count = {"products": db.query(models.Product).filter(models.Product.categoryId == cat.id).count()}
+    return categories

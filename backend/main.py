@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 import models
 from database import engine
-from routers import about_shop, products, categories, auth, orders, reviews, payment, admin, user, coupons, uploads
+from routers import about_shop, products, categories, auth, orders, reviews, payment, admin, user, coupons, uploads, public_settings
 
 # Create tables if they don't exist
 models.Base.metadata.create_all(bind=engine)
@@ -45,3 +45,4 @@ app.include_router(admin.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
 app.include_router(coupons.router, prefix="/api")
 app.include_router(uploads.router, prefix="/api")
+app.include_router(public_settings.router, prefix="/api")

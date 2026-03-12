@@ -150,7 +150,7 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
             <div>
-              <span className="text-red-500 font-black tracking-[0.2em] text-xs uppercase mb-3 block animate-bounce">Limited Offers</span>
+              <span className="text-hot font-black tracking-[0.2em] text-xs uppercase mb-3 block animate-bounce">Limited Offers</span>
               <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter">🔥 Hot Deals of the Week</h2>
             </div>
             <Link href="/shop?hotDeals=true" className="inline-flex items-center gap-3 bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-accent transition-colors shadow-xl group">

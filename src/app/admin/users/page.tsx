@@ -30,15 +30,15 @@ export default function AdminUsersPage() {
       .finally(() => setLoading(false));
   }, [token]);
 
-  if (loading) return <div className="animate-pulse h-64 bg-gray-200 rounded-xl" />;
+  if (loading) return <div className="animate-pulse h-64 bg-accent/5 rounded-xl" />;
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Users</h1>
       <div className="card overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
+          <thead className="bg-accent/[0.02]">
+            <tr className="text-[10px] font-black uppercase tracking-widest text-gray-400">
               <th className="text-left p-4">Name</th>
               <th className="text-left p-4">Email</th>
               <th className="text-left p-4">Phone</th>

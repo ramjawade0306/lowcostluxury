@@ -23,3 +23,12 @@ export function formatPrice(price: number): string {
 export function calcDiscount(price: number, discount: number): number {
   return Math.round(price - (price * discount) / 100);
 }
+
+export function getMediaUrl(url: string | null | undefined): string {
+  if (!url) return '/placeholder.svg';
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+  return `${baseUrl}${cleanUrl}`;
+}

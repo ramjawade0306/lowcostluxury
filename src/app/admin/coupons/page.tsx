@@ -119,12 +119,12 @@ export default function AdminCouponsPage() {
       )}
 
       {loading ? (
-        <div className="animate-pulse h-48 bg-gray-200 rounded-xl" />
+        <div className="animate-pulse h-48 bg-accent/5 rounded-xl" />
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
+            <thead className="bg-accent/[0.02]">
+              <tr className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                 <th className="text-left p-4">Code</th>
                 <th className="text-left p-4">Discount</th>
                 <th className="text-left p-4">Min Order</th>
@@ -139,7 +139,7 @@ export default function AdminCouponsPage() {
                   <td className="p-4">₹{c.discount}</td>
                   <td className="p-4">₹{c.minOrder}</td>
                   <td className="p-4">{c.usedCount}{c.maxUses ? `/${c.maxUses}` : ''}</td>
-                  <td className="p-4">{c.isActive ? <span className="text-green-600">Active</span> : <span className="text-gray-400">Inactive</span>}</td>
+                  <td className="p-4">{c.isActive ? <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Active</span> : <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Inactive</span>}</td>
                 </tr>
               ))}
             </tbody>

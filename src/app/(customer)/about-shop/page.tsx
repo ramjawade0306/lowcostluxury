@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getMediaUrl } from '@/lib/utils';
 
 export default function AboutShopPage() {
     const [data, setData] = useState<any>(null);
@@ -47,31 +48,32 @@ export default function AboutShopPage() {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-12">
-            {/* 1. Shop Introduction */}
-            <div className="text-center mb-16">
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">About Our Shop</h1>
-                <p className="text-lg text-gray-600 max-w-3xl mx-auto whitespace-pre-line leading-relaxed">
+            <div className="text-center mb-20 relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-accent/10 rounded-full blur-3xl -z-10"></div>
+                <span className="text-accent font-black tracking-[0.4em] text-xs uppercase mb-4 block">Our Story</span>
+                <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-8 tracking-tighter">About Our Shop</h1>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto whitespace-pre-line font-medium leading-relaxed drop-shadow-sm">
                     {data.shopDescription || 'Welcome to our store. We provide affordable and genuine products.'}
                 </p>
             </div>
 
             {/* 2. Trust Elements */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
-                <div className="bg-accent/5 p-6 rounded-2xl text-center border border-accent/10">
-                    <div className="text-3xl font-bold text-accent mb-2">{data.yearsInBusiness || '1'}+</div>
-                    <div className="text-sm text-gray-600 font-medium">Years in Business</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-24">
+                <div className="card p-8 text-center animate-float" style={{ animationDelay: '0s' }}>
+                    <div className="text-4xl font-black text-accent mb-2 tracking-tighter">{data.yearsInBusiness || '1'}+</div>
+                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Years Experience</div>
                 </div>
-                <div className="bg-accent/5 p-6 rounded-2xl text-center border border-accent/10">
-                    <div className="text-3xl font-bold text-accent mb-2">{data.customersServed || '100'}+</div>
-                    <div className="text-sm text-gray-600 font-medium">Happy Customers</div>
+                <div className="card p-8 text-center animate-float group" style={{ animationDelay: '-1s' }}>
+                    <div className="text-4xl font-black text-accent mb-2 tracking-tighter group-hover:scale-110 transition-transform">{data.customersServed || '100'}+</div>
+                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Happy Clients</div>
                 </div>
-                <div className="bg-accent/5 p-6 rounded-2xl text-center border border-accent/10">
-                    <div className="text-xl font-bold text-accent mb-2 break-words text-center">100%</div>
-                    <div className="text-sm text-gray-600 font-medium">{data.promiseText || 'Genuine Products'}</div>
+                <div className="card p-8 text-center animate-float" style={{ animationDelay: '-2s' }}>
+                    <div className="text-4xl font-black text-emerald-500 mb-2 tracking-tighter">100%</div>
+                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{data.promiseText || 'Genuine'}</div>
                 </div>
-                <div className="bg-accent/5 p-6 rounded-2xl text-center border border-accent/10">
-                    <div className="text-xl font-bold text-accent mb-2 select-none">🚀</div>
-                    <div className="text-sm text-gray-600 font-medium">{data.shippingNote || 'Fast Shipping'}</div>
+                <div className="card p-8 text-center animate-float" style={{ animationDelay: '-3s' }}>
+                    <div className="text-4xl font-black text-accent mb-2 drop-shadow-lg">🚀</div>
+                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{data.shippingNote || 'Fast Shipping'}</div>
                 </div>
             </div>
 
@@ -83,7 +85,7 @@ export default function AboutShopPage() {
                     <div className="flex-shrink-0 relative z-10 hidden md:block">
                         {data.ownerPhoto ? (
                             <img
-                                src={data.ownerPhoto}
+                                src={getMediaUrl(data.ownerPhoto)}
                                 alt={data.ownerName || 'Shop Owner'}
                                 className="w-40 h-40 md:w-56 md:h-56 object-cover rounded-full shadow-xl border-4 border-white"
                             />
@@ -100,7 +102,7 @@ export default function AboutShopPage() {
                         <div className="md:hidden flex justify-center mb-6">
                             {data.ownerPhoto ? (
                                 <img
-                                    src={data.ownerPhoto}
+                                    src={getMediaUrl(data.ownerPhoto)}
                                     alt={data.ownerName || 'Shop Owner'}
                                     className="w-32 h-32 object-cover rounded-full shadow-xl border-4 border-white"
                                 />
@@ -160,7 +162,7 @@ export default function AboutShopPage() {
                             {proofVideos.map((src: string, index: number) => (
                                 <div key={index} className="aspect-video relative rounded-2xl overflow-hidden shadow-lg border border-gray-100 bg-black group">
                                     <video
-                                        src={src}
+                                        src={getMediaUrl(src)}
                                         controls
                                         className="w-full h-full object-cover"
                                         poster="/placeholder.svg"
@@ -175,7 +177,7 @@ export default function AboutShopPage() {
                             {proofImages.map((src: string, index: number) => (
                                 <div key={index} className="aspect-square relative rounded-2xl overflow-hidden hover:opacity-90 transition shadow-sm border border-gray-100 bg-gray-50 flex items-center justify-center">
                                     <img
-                                        src={src}
+                                        src={getMediaUrl(src)}
                                         alt={`Proof image ${index + 1}`}
                                         className="w-full h-full object-cover"
                                     />

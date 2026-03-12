@@ -22,7 +22,6 @@ export default function RootLayout({
         <div className="relative z-10">
           {children}
         </div>
-        <WhatsAppButton />
         <Toaster position="bottom-center" />
       </body>
     </html>

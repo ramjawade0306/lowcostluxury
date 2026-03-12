@@ -190,7 +190,7 @@ export default function CheckoutPage() {
             <h3 className="font-bold mb-4">Payment</h3>
             <label
               onClick={() => setPaymentMethod('phonepe')}
-              className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer mb-3 transition-all ${paymentMethod === 'phonepe' ? 'border-accent bg-orange-50 ring-1 ring-accent' : 'border-gray-200 hover:bg-gray-50'
+              className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer mb-3 transition-all ${paymentMethod === 'phonepe' ? 'border-accent bg-accent/5 ring-1 ring-accent' : 'border-gray-200 hover:bg-gray-50'
                 }`}
             >
               <input
@@ -220,7 +220,7 @@ export default function CheckoutPage() {
             {codEnabled && (
               <label
                 onClick={() => setPaymentMethod('cod')}
-                className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-accent bg-orange-50 ring-1 ring-accent' : 'border-gray-200 hover:bg-gray-50'
+                className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-accent bg-accent/5 ring-1 ring-accent' : 'border-gray-200 hover:bg-gray-50'
                   }`}
               >
                 <input
@@ -250,7 +250,7 @@ export default function CheckoutPage() {
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {items.map((i) => (
                 <div key={i.productId} className="flex gap-3">
-                  <div className="relative w-12 h-12 rounded overflow-hidden bg-gray-100 flex-shrink-0">
+                  <div className="relative w-12 h-12 rounded overflow-hidden bg-accent/5 flex-shrink-0">
                     <Image src={i.image} alt={i.name} fill className="object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -270,7 +270,7 @@ export default function CheckoutPage() {
                 <span>{formatPrice(deliveryCharge)}</span>
               </div>
               {couponDiscount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-emerald-500">
                   <span>Coupon</span>
                   <span>-{formatPrice(couponDiscount)}</span>
                 </div>

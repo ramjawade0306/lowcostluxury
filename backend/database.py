@@ -21,9 +21,11 @@ if DATABASE_URL and DATABASE_URL.startswith("file:"):
         DATABASE_URL = f"sqlite:///{db_path}"
 
 if not DATABASE_URL:
-    # Default to local prisma sqlite database if no env var is set
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    DB_PATH = os.path.join(BASE_DIR, "prisma", "dev.db")
+    # Default to local prisma sqlite database
+    # Assuming the project root is parent of backend
+    BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+    ROOT_DIR = os.path.dirname(BACKEND_DIR)
+    DB_PATH = os.path.join(ROOT_DIR, "prisma", "dev.db")
     DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 # For SQLite, we need connect_args={"check_same_thread": False}

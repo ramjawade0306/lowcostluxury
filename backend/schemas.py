@@ -28,6 +28,9 @@ class AboutShop(AboutShopBase):
     updatedAt: datetime
 
 # --- Categories ---
+class CategoryCount(BaseModel):
+    products: int
+
 class CategoryBase(BaseModel):
     name: str
     slug: str
@@ -37,6 +40,7 @@ class Category(CategoryBase):
     model_config = ConfigDict(from_attributes=True)
     id: str
     createdAt: datetime
+    count: Optional[CategoryCount] = Field(None, serialization_alias="_count")
 
 class CategoryCreate(BaseModel):
     name: str
