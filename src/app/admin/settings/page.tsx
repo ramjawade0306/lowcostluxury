@@ -48,7 +48,7 @@ export default function AdminSettingsPage() {
     }
   };
 
-  if (loading) return <div className="animate-pulse h-64 bg-gray-200 rounded-xl" />;
+  if (loading) return <div className="animate-pulse h-64 bg-accent/5 rounded-xl" />;
 
   return (
     <div>

@@ -119,12 +119,12 @@ export default function AdminCategoriesPage() {
       )}
 
       {loading ? (
-        <div className="animate-pulse h-48 bg-gray-200 rounded-xl" />
+        <div className="animate-pulse h-48 bg-accent/5 rounded-xl" />
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
+            <thead className="bg-accent/[0.02]">
+              <tr className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                 <th className="text-left p-4">Name</th>
                 <th className="text-left p-4">Slug</th>
                 <th className="text-left p-4">Products</th>
@@ -136,7 +136,7 @@ export default function AdminCategoriesPage() {
                 <tr key={c.id} className="border-t">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-10 h-10 rounded overflow-hidden bg-gray-100 border border-gray-200">
+                      <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-accent/5">
                         <Image src={getMediaUrl(c.image)} alt="" fill className="object-cover" />
                       </div>
                       <Link href={`/admin/products?category=${c.id}`} className="font-medium text-accent hover:underline">
@@ -146,9 +146,9 @@ export default function AdminCategoriesPage() {
                   </td>
                   <td className="p-4 text-gray-500">{c.slug}</td>
                   <td className="p-4">{c._count?.products ?? 0}</td>
-                  <td className="p-4">
-                    <button onClick={() => { setEditing(c); setName(c.name); setImage(c.image || ''); setShowForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-accent text-sm mr-2">Edit</button>
-                    <button onClick={() => remove(c.id)} className="text-red-500 text-sm">Delete</button>
+                  <td className="p-4 text-right">
+                    <button onClick={() => { setEditing(c); setName(c.name); setImage(c.image || ''); setShowForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-accent hover:underline font-bold text-sm mr-4">Edit</button>
+                    <button onClick={() => remove(c.id)} className="text-hot hover:underline font-medium text-sm">Delete</button>
                   </td>
                 </tr>
               ))}
